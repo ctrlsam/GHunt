@@ -81,11 +81,12 @@ def sanitize_location(location):
 def get_driverpath():
     tmprinter = TMPrinter()
     drivers = [str(x.absolute()) for x in Path('.').rglob('chromedriver*')]
-    if not drivers:
-        drivers = shutil.which("chromedriver")
     if drivers:
         return drivers[0]
     else:
+        driver = shutil.which("chromedriver")
+        if driver:
+            return driver
         tmprinter.out("I can't find the chromedriver, so I'm downloading and installing it for you...")
         path = chromedriver_autoinstaller.install(cwd=True)
         tmprinter.out("")
@@ -103,7 +104,7 @@ def get_chrome_options_args(is_headless):
     chrome_options.add_argument("--no-sandbox")
     if is_headless:
         chrome_options.add_argument("--headless")
-    if Os().wsl or Os().windows:
+    if (Os().wsl or Os().windows) and is_headless:
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-setuid-sandbox")
