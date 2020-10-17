@@ -19,7 +19,7 @@ class element_has_substring_or_substring(object):
         self.substring2 = substring2
         
     def __call__(self, driver):
-        element = driver.find_element(*self.locator)   # Finding the referenced element
+        element = driver.find_element(*self.locator) # Find the referenced element
         if self.substring1 in element.text:
             return self.substring1
         elif self.substring2 in element.text:
@@ -30,6 +30,7 @@ class element_has_substring_or_substring(object):
 
 def get_source(gaiaID, client, cookies, headers, is_headless):
     baseurl = f"https://get.google.com/albumarchive/{gaiaID}/albums/profile-photos?hl=en"
+
     req = client.get(baseurl)
     if req.status_code != 200:
         return False
@@ -70,16 +71,24 @@ def get_source(gaiaID, client, cookies, headers, is_headless):
 
     wait.until(EC.text_to_be_present_in_element((By.XPATH, "//body"), "Album Archive"))
     tmprinter.out("Got the albums overview !")
+
     no_photos_trigger = "reached the end"
     photos_trigger = " item"
     body = driver.find_element_by_xpath("//body").text
+
     if no_photos_trigger in body:
         stats = "notfound"
+
     elif photos_trigger in body:
         stats = "found"
+        
     else:
+
         try:
-            result = wait.until(element_has_substring_or_substring((By.XPATH, "//body"), no_photos_trigger, photos_trigger))
+            result = wait.until(
+                element_has_substring_or_substring((By.XPATH, "//body"),
+                no_photos_trigger, photos_trigger))
+
         except Exception:
             tmprinter.out("[-] Timeout while fetching photos.")
             return False
@@ -90,6 +99,7 @@ def get_source(gaiaID, client, cookies, headers, is_headless):
                 stats = "found"
             else:
                 return False
+
     tmprinter.out("")
     source = driver.page_source
     driver.close()
@@ -106,6 +116,7 @@ def gpics(gaiaID, client, cookies, headers, regex_albums, regex_photos, headless
     if not out:
         print("=> Couldn't fetch the public photos.")
         return False
+
     if out["stats"] == "notfound":
         print("=> No album")
         return False
@@ -118,21 +129,26 @@ def gpics(gaiaID, client, cookies, headers, regex_albums, regex_photos, headless
     if results:
         exifeater = ExifEater()
         pics = []
+
         for album in results:
             album_name = album[1]
             album_link = baseurl + gaiaID + "/album/" + album[0]
             album_length = int(album[2])
 
-            if album_length >= 1:
-                req = client.get(album_link)
-                source = req.text.replace('\n', '')
-                results_pics = re.compile(regex_photos).findall(source)
-                for pic in results_pics:
-                    pic_name = pic[1]
-                    pic_link = pic[0]
-                    pics.append(pic_link)
+            if album_length < 1:
+                continue
+
+            req = client.get(album_link)
+            source = req.text.replace('\n', '')
+            results_pics = re.compile(regex_photos).findall(source)
+
+            for pic in results_pics:
+                pic_name = pic[1]
+                pic_link = pic[0]
+                pics.append(pic_link)
 
         print(f"=> {list_albums_length} albums{', ' + str(len(pics)) + ' photos' if list_albums_length else ''}")
+        
         for pic in pics:
             req = client.get(pic)
             img = Image.open(BytesIO(req.content))

@@ -4,7 +4,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from lib.search import search as gdoc_search
+from lib.gdocs import search as gdoc_search
 from lib.utils import *
 
 

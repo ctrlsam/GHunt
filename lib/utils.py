@@ -24,18 +24,21 @@ def is_email_google_account(httpx_client, auth, cookies, email, hangouts_token):
         "Origin": "https://hangouts.google.com"
     }
 
-    req = httpx_client.post(host + url, data=body.format(email), headers=headers, cookies=cookies)
+    req = httpx_client.post(host + url, data=body.format(email),
+                            headers=headers, cookies=cookies)
     data = json.loads(req.text)
-    if not "matches" in data:
+    if "matches" not in data:
         exit("[-] This email address does not belong to a Google Account.")
 
     return data
+
 
 def get_account_name(httpx_client, gaiaID):
     req = httpx_client.get(f"https://www.google.com/maps/contrib/{gaiaID}")
     gmaps_source = req.text
     name = gmaps_source.split("Contributions by")[1].split('"')[0].strip()
     return name
+
 
 def image_hash(img):
     hash = str(imagehash.average_hash(img))
@@ -69,7 +72,7 @@ def sanitize_location(location):
         town = location["municipality"]
     else:
         not_town = True
-    if not "country" in location:
+    if "country" not in location:
         not_country = True
         location["country"] = country
     if not_country and not_town:
@@ -83,18 +86,22 @@ def get_driverpath():
     drivers = [str(x.absolute()) for x in Path('.').rglob('chromedriver*')]
     if drivers:
         return drivers[0]
+
+    driver = shutil.which("chromedriver")
+    if driver:
+        return driver
+
+    tmprinter.out("I can't find the chromedriver, so I'm downloading and "
+                  "installing it for you...")
+    path = chromedriver_autoinstaller.install(cwd=True)
+    tmprinter.out("")
+    drivers = [str(x.absolute()) for x in Path('.').rglob('chromedriver*') if x.name.lower() == "chromedriver" or x.name.lower() == "chromedriver.exe"]
+    if drivers:
+        return path
     else:
-        driver = shutil.which("chromedriver")
-        if driver:
-            return driver
-        tmprinter.out("I can't find the chromedriver, so I'm downloading and installing it for you...")
-        path = chromedriver_autoinstaller.install(cwd=True)
-        tmprinter.out("")
-        drivers = [str(x.absolute()) for x in Path('.').rglob('chromedriver*') if x.name.lower() == "chromedriver" or x.name.lower() == "chromedriver.exe"]
-        if drivers:
-            return path
-        else:
-            exit(f"I can't find the chromedriver.\nI installed it in \"{path}\" but it must be in the GHunt directory or PATH, you should move it here.")
+        exit(f"I can't find the chromedriver.\nI installed it in \"{path}\""
+             "but it must be in the GHunt directory or PATH, "
+             "you should move it here.")
 
 
 def get_chrome_options_args(is_headless):

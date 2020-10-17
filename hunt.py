@@ -41,10 +41,10 @@ if __name__ == "__main__":
     data = is_email_google_account(client, auth, cookies, email,
                                    hangouts_token)
     geolocator = Nominatim(user_agent="nominatim")
-    print(f"[+] {len(data['matches'])} account found !")
+    print(f"\n[+] {len(data['matches'])} account found !")
 
     for user in data["matches"]:
-        print("\n------------------------------\n")
+        print("------------------------------\n")
 
         gaiaID = user["personId"][0]
         email = user["lookupId"]

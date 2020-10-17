@@ -25,9 +25,11 @@ class Os:
         if 'cygwin' in syst:
             self.cygwin = True
             self.os = 'cygwin'
+
         elif 'darwin' in syst:
             self.mac = True
             self.os = 'mac'
+
         elif 'linux' in syst:
             self.linux = True
             self.os = 'linux'
@@ -35,9 +37,11 @@ class Os:
                 self.wsl = True
                 self.linux = False
                 self.os = 'wsl'
+
         elif 'windows' in syst:
             self.windows = True
             self.os = 'windows'
+
         elif 'bsd' in syst:
             self.bsd = True
             self.os = 'bsd'
